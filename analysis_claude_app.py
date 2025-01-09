@@ -86,9 +86,11 @@ def summarize_text(api_key, text):
 def format_result(content):
     """분석 결과를 포맷팅하는 함수"""
     
-    # 결과를 줄바꿈으로 분리
-    sections = content.split('\n\n')
-    formatted_sections = []
+    # content가 리스트인 경우 첫 번째 요소의 text 속성을 사용
+    if isinstance(content, list) and hasattr(content[0], 'text'):
+        text_content = content[0].text
+    else:
+        text_content = str(content)
     
     # 섹션별 이모지 매핑
     section_emojis = {
@@ -98,6 +100,10 @@ def format_result(content):
         "4": "🤖",  # AI 모델
         "5": "💰",  # 가격정책
     }
+    
+    # 텍스트를 섹션으로 분리
+    sections = text_content.split('\n\n')
+    formatted_sections = []
     
     # 각 섹션을 HTML로 포맷팅
     for section in sections:
@@ -109,7 +115,9 @@ def format_result(content):
         emoji = section_emojis.get(section_num, "✨")
         
         # 부제목과 내용 분리
-        title, *contents = section.split('\n')
+        lines = section.split('\n')
+        title = lines[0]
+        contents = lines[1:] if len(lines) > 1 else []
         
         # 내용을 리스트 아이템으로 포맷팅
         content_items = []
