@@ -49,13 +49,10 @@ def analyze_webpage(url):
 
 def summarize_text(api_key, text):
     try:
-        # Anthropic 클라이언트 초기화 - 기본 설정 사용
-        anthropic = Anthropic(
-            api_key=api_key,
-            base_url="https://api.anthropic.com",
-        )
+        # 클라이언트 초기화 - API 키만 사용
+        client = Anthropic(api_key=api_key)
         
-        message = anthropic.messages.create(
+        message = client.messages.create(
             model="claude-3-5-sonnet-20240620",
             max_tokens=1000,
             temperature=0.7,
