@@ -105,11 +105,21 @@ def format_result(content):
     sections = text_content.split('\n\n')
     formatted_sections = []
     
+    # 제목 부분
+    header = f"""
+    <div style="text-align: center; margin-bottom: 30px;">
+        📊 분석 결과 📊
+    </div>
+    <div style="margin-bottom: 20px; text-align: center; font-size: 1.2em; color: #2c3e50;">
+        🎯 ★★내용 요약 (핵심 포인트 5개)★★ 🎯
+    </div>
+    """
+
     # 각 섹션을 HTML로 포맷팅
     for section in sections:
         if not section.strip():
             continue
-            
+        
         # 섹션 번호 추출
         section_num = section[0]
         emoji = section_emojis.get(section_num, "✨")
@@ -134,7 +144,7 @@ def format_result(content):
         formatted_section = f"""
             <div style="margin-bottom: 30px; background-color: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; border: 1px solid #eee;">
                 <h3 style="color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                    {emoji} {title} {emoji}
+                    {emoji} {title}
                 </h3>
                 <ul style="list-style-type: none; padding-left: 0;">
                     {''.join(content_items)}
@@ -144,17 +154,9 @@ def format_result(content):
     
     # 전체 HTML 조합
     return f"""
-    <div class="result-container" style="font-family: 'Nanum Gothic', sans-serif; line-height: 1.8;">
-        <h1 style="text-align: center; margin-bottom: 30px; color: #34495e;">
-            📊 분석 결과 📊
-        </h1>
-        
-        <div style="margin-bottom: 20px; text-align: center; font-size: 1.2em; color: #2c3e50;">
-            🎯 ★★내용 요약 (핵심 포인트 5개)★★ 🎯
-        </div>
-        
+    <div style="font-family: 'Nanum Gothic', sans-serif; line-height: 1.8;">
+        {header}
         {''.join(formatted_sections)}
-        
         <div style="text-align: right; margin-top: 20px; color: #7f8c8d;">
             ✨ Powered by Claude AI ✨
         </div>
