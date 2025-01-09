@@ -1,30 +1,10 @@
+# app.py
 import streamlit as st
 from anthropic import Anthropic, APIError
 import requests
 from bs4 import BeautifulSoup
-
-st.set_page_config(page_title="웹페이지 분석 도구", page_icon="📊", layout="wide")
-
-# CSS 스타일 적용
-st.markdown("""
-    <style>
-    .main {
-        padding: 20px;
-        font-family: 'Nanum Gothic', sans-serif;
-    }
-    .result-container {
-        line-height: 1.8;
-        padding: 20px;
-        background-color: white;
-        border-radius: 10px;
-        margin: 20px 0;
-    }
-    .stButton > button {
-        width: 100%;
-        margin-top: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+from config import setup_page
+from formatter import format_result
 
 def analyze_webpage(url):
     """웹페이지 내용을 가져오고 분석하는 함수"""
@@ -83,87 +63,8 @@ def summarize_text(api_key, text):
     except Exception as e:
         return False, f"요약 중 오류 발생: {str(e)}"
 
-def format_result(content):
-    """분석 결과를 포맷팅하는 함수"""
-    
-    # content가 리스트인 경우 첫 번째 요소의 text 속성을 사용
-    if isinstance(content, list) and hasattr(content[0], 'text'):
-        text_content = content[0].text
-    else:
-        text_content = str(content)
-    
-    # 섹션별 이모지 매핑
-    section_emojis = {
-        "1": "🚀",  # 소개
-        "2": "⚡",  # 프레임워크
-        "3": "🔧",  # 핵심기능
-        "4": "🤖",  # AI 모델
-        "5": "💰",  # 가격정책
-    }
-    
-    # 텍스트를 섹션으로 분리
-    sections = text_content.split('\n\n')
-    formatted_sections = []
-    
-    # 제목 부분
-    header = f"""
-    <div style="text-align: center; margin-bottom: 30px;">
-        📊 분석 결과 📊
-    </div>
-    <div style="margin-bottom: 20px; text-align: center; font-size: 1.2em; color: #2c3e50;">
-        🎯 ★★내용 요약 (핵심 포인트 5개)★★ 🎯
-    </div>
-    """
-
-    # 각 섹션을 HTML로 포맷팅
-    for section in sections:
-        if not section.strip():
-            continue
-        
-        # 섹션 번호 추출
-        section_num = section[0]
-        emoji = section_emojis.get(section_num, "✨")
-        
-        # 부제목과 내용 분리
-        lines = section.split('\n')
-        title = lines[0]
-        contents = lines[1:] if len(lines) > 1 else []
-        
-        # 내용을 리스트 아이템으로 포맷팅
-        content_items = []
-        for item in contents:
-            if item.strip():
-                if item.startswith('-'):
-                    item = item[1:].strip()
-                content_items.append(f"""
-                    <li style="margin: 10px 0; padding-left: 20px;">
-                        💫 {item}
-                    </li>""")
-        
-        # 섹션 HTML 생성
-        formatted_section = f"""
-            <div style="margin-bottom: 30px; background-color: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; border: 1px solid #eee;">
-                <h3 style="color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                    {emoji} {title}
-                </h3>
-                <ul style="list-style-type: none; padding-left: 0;">
-                    {''.join(content_items)}
-                </ul>
-            </div>"""
-        formatted_sections.append(formatted_section)
-    
-    # 전체 HTML 조합
-    return f"""
-    <div style="font-family: 'Nanum Gothic', sans-serif; line-height: 1.8;">
-        {header}
-        {''.join(formatted_sections)}
-        <div style="text-align: right; margin-top: 20px; color: #7f8c8d;">
-            ✨ Powered by Claude AI ✨
-        </div>
-    </div>
-    """
-
 def main():
+    setup_page()
     st.title("웹페이지 분석 및 요약 도구")
     
     with st.container():
@@ -201,7 +102,8 @@ def main():
                     
                     success, summary = summarize_text(api_key, content)
                     if success:
-                        st.markdown(format_result(summary), unsafe_allow_html=True)
+                        # HTML 대신 마크다운으로 렌더링
+                        st.markdown(format_result(summary))
                     else:
                         st.error(summary)
                 except Exception as e:
